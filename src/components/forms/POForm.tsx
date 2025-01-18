@@ -1,31 +1,30 @@
-import { useState } from 'react'
+import { useState } from "react";
 
 export default function POForm() {
-  const [dateReceivedCOA, setDateReceivedCOA] = useState('')
-  const [delayDuration, setDelayDuration] = useState(0)
+  const [dateReceivedCOA, setDateReceivedCOA] = useState("");
+  const [delayDuration, setDelayDuration] = useState(0);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const date = e.target.value;
     setDateReceivedCOA(date);
-  
+
     if (!date) {
       setDelayDuration(0);
       return;
     }
-  
+
     const receivedDate = new Date(date);
     const currentDate = new Date();
-  
+
     // Normalize dates to midnight to avoid partial day differences
     receivedDate.setHours(0, 0, 0, 0);
     currentDate.setHours(0, 0, 0, 0);
-  
+
     const diffTime = Math.abs(currentDate.getTime() - receivedDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
     setDelayDuration(diffDays);
   };
-  
 
   return (
     <form>
@@ -36,9 +35,28 @@ export default function POForm() {
             Please fill out the form below with the required information.
           </p>
 
+          <div className="sm:col-span-3">
+            <label
+              htmlFor="po-date"
+              className="block text-sm/6 font-medium text-gray-900"
+            >
+              IAR Number
+            </label>
+            <div className="mt-2">
+              <input
+                id="iar-no"
+                name="iar-no"
+                type="text"
+                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+              />
+            </div>
+          </div>
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="sm:col-span-3">
-              <label htmlFor="po-no" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="po-no"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 PO No
               </label>
               <div className="mt-2">
@@ -52,7 +70,10 @@ export default function POForm() {
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="supplier" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="supplier"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Supplier
               </label>
               <div className="mt-2">
@@ -66,7 +87,10 @@ export default function POForm() {
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="po-date" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="po-date"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 PO Date
               </label>
               <div className="mt-2">
@@ -80,7 +104,10 @@ export default function POForm() {
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="delivery-date" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="delivery-date"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Delivery Date
               </label>
               <div className="mt-2">
@@ -94,7 +121,10 @@ export default function POForm() {
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="delivery-term" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="delivery-term"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Delivery Term
               </label>
               <div className="mt-2">
@@ -108,7 +138,10 @@ export default function POForm() {
             </div>
 
             <div className="col-span-full">
-              <label htmlFor="particulars" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="particulars"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Particulars
               </label>
               <div className="mt-2">
@@ -117,13 +150,16 @@ export default function POForm() {
                   name="particulars"
                   rows={3}
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  defaultValue={''}
+                  defaultValue={""}
                 />
               </div>
             </div>
 
             <div className="col-span-full">
-              <label htmlFor="purpose" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="purpose"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Purpose
               </label>
               <div className="mt-2">
@@ -132,13 +168,16 @@ export default function POForm() {
                   name="purpose"
                   rows={3}
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  defaultValue={''}
+                  defaultValue={""}
                 />
               </div>
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="amount" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="amount"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Amount
               </label>
               <div className="mt-2">
@@ -152,7 +191,10 @@ export default function POForm() {
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="date-signed-supplier" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="date-signed-supplier"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Date Signed - Supplier
               </label>
               <div className="mt-2">
@@ -166,7 +208,10 @@ export default function POForm() {
             </div>
 
             <div className="col-span-full">
-              <label htmlFor="remarks" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="remarks"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Remarks
               </label>
               <div className="mt-2">
@@ -175,13 +220,16 @@ export default function POForm() {
                   name="remarks"
                   rows={3}
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  defaultValue={''}
+                  defaultValue={""}
                 />
               </div>
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="received-by" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="received-by"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Received By
               </label>
               <div className="mt-2">
@@ -195,7 +243,10 @@ export default function POForm() {
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="submitted-by" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="submitted-by"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Submitted By
               </label>
               <div className="mt-2">
@@ -209,7 +260,10 @@ export default function POForm() {
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="agency" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="agency"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Agency
               </label>
               <div className="mt-2">
@@ -223,7 +277,10 @@ export default function POForm() {
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="date-received-coa" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="date-received-coa"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Date Received - COA
               </label>
               <div className="mt-2">
@@ -239,7 +296,10 @@ export default function POForm() {
             </div>
 
             <div className="sm:col-span-3">
-              <label htmlFor="delay-duration" className="block text-sm/6 font-medium text-gray-900">
+              <label
+                htmlFor="delay-duration"
+                className="block text-sm/6 font-medium text-gray-900"
+              >
                 Delay Duration (Days)
               </label>
               <div className="mt-2">
@@ -257,7 +317,10 @@ export default function POForm() {
         </div>
 
         <div className="mt-6 flex items-center justify-end gap-x-6">
-          <button type="button" className="text-sm/6 font-semibold text-gray-900">
+          <button
+            type="button"
+            className="text-sm/6 font-semibold text-gray-900"
+          >
             Cancel
           </button>
           <button
@@ -269,5 +332,5 @@ export default function POForm() {
         </div>
       </div>
     </form>
-  )
+  );
 }
