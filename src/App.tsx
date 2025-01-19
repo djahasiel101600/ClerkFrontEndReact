@@ -7,18 +7,25 @@ import RCI from "./components/Pages/RCI";
 import RD from "./components/Pages/RD";
 import Communications from "./components/Pages/Communications";
 import DocumentInventory from "./components/Pages/DocumentInventory";
-import { Payment, columns } from "./rci/columns";
+import { RCIType, columns } from "./rci/columns";
 import { DataTable } from "./rci/data-table";
+import fetchData from "./services/Api";
+
+async function getData(): Promise<RCIType[]> {
+  // Fetch data from your API here.
+  const url = "http://127.0.0.1:8000/api/asdi-lfps-disbursment-voucher-record/";
+  return await fetchData(url);
+}
+
+import { useEffect, useState } from "react";
 
 export default function App() {
-  const data: Payment[] = [
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      payee: "Hearts Foods Hub",
-    },
-  ];
+  const [data, setData] = useState<RCIType[]>([]);
+
+  useEffect(() => {
+    getData().then((fetchedData) => setData(fetchedData));
+  }, []);
+
   return (
     <>
       <BrowserRouter>
@@ -28,7 +35,7 @@ export default function App() {
             path="/report-checks-issued"
             element={
               <PageLayout>
-                <RCI />
+                <DataTable columns={columns} data={data} />
               </PageLayout>
             }
           />
@@ -74,7 +81,6 @@ export default function App() {
           />
         </Routes>
       </BrowserRouter>
-      <DataTable columns={columns} data={data} />
     </>
   );
 }

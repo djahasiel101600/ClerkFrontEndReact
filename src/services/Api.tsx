@@ -1,15 +1,14 @@
 import axios from "axios";
 
-function Api() {
-  const api = axios
-    .get("http://127.0.0.1:8000/api/asdi-lfps-disbursment-voucher-record/")
-    .then((response) => {
-      return response.data;
-    })
-    .catch((error) => {
-      console.log(error);
-      return [];
-    });
-}
+const fetchData = async (url: string) => {
+  try {
+    const response = await axios.get(url);
+    console.log(response.data[1]);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return [];
+  }
+};
 
-export default Api;
+export default fetchData;
