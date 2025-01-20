@@ -1,271 +1,91 @@
-import { PhotoIcon, UserCircleIcon } from '@heroicons/react/24/solid'
+"use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
-export default function Form() {
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+// # IAR Fields:
+// # IAR No.
+// # IAR Date
+// # Supplier
+// # Particulars
+// # Amount
+// # Date Received (COA OFfice)
+// # Delay Duration
+// # DateTime Created
+// # DateTime Updated
+// # Remarks
+
+const formSchema = z.object({
+  iar_no: z.string().min(6, { message: "IAR No. is required" }),
+  iar_date: z.date({ required_error: "IAR Date is required" }),
+  supplier: z.string({ message: "Supplier is required" }),
+  particulars: z.string({ message: "Particulars is required" }),
+  amount: z.number({ message: "Amount is required" }),
+  date_received: z.date({ message: "Date Received is required" }),
+  delay_duration: z.number({ message: "Delay Duration is required" }),
+  remarks: z.string().optional(),
+});
+
+export function ProfileForm() {
+  // 1. Define your form.
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      iar_no: "",
+      iar_date: new Date(),
+      supplier: "",
+      particulars: "",
+      amount: 0,
+      date_received: new Date(),
+      delay_duration: 0,
+      remarks: "",
+    },
+  });
+
+  // 2. Define a submit handler.
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    // Do something with the form values.
+    // ✅ This will be type-safe and validated.
+    console.log(values);
+  }
   return (
-    <form>
-      <div className="space-y-12">
-        <div className="border-b border-gray-900/10 pb-12">
-          <h2 className="text-base/7 font-semibold text-gray-900">IAR Form</h2>
-          <p className="mt-1 text-sm/6 text-gray-600">
-            Please fill out the form below with the required information.
-          </p>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <FormField
+          control={form.control}
+          name="iar_no"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>IAR Number</FormLabel>
+              <FormControl>
+                <Input placeholder="0000-00-0000" {...field} />
+              </FormControl>
+              <FormDescription>
+                This is your public display name.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Submit</Button>
+      </form>
+    </Form>
+  );
+}
 
-          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-            <div className="sm:col-span-3">
-              <label htmlFor="iar-no" className="block text-sm/6 font-medium text-gray-900">
-                IAR No
-              </label>
-              <div className="mt-2">
-                <input
-                  id="iar-no"
-                  name="iar-no"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="supplier" className="block text-sm/6 font-medium text-gray-900">
-                Supplier
-              </label>
-              <div className="mt-2">
-                <input
-                  id="supplier"
-                  name="supplier"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="iar-date" className="block text-sm/6 font-medium text-gray-900">
-                IAR Date
-              </label>
-              <div className="mt-2">
-                <input
-                  id="iar-date"
-                  name="iar-date"
-                  type="date"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="col-span-full">
-              <label htmlFor="particulars" className="block text-sm/6 font-medium text-gray-900">
-                Particulars
-              </label>
-              <div className="mt-2">
-                <textarea
-                  id="particulars"
-                  name="particulars"
-                  rows={3}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  defaultValue={''}
-                />
-              </div>
-            </div>
-
-            <div className="col-span-full">
-              <label htmlFor="purpose" className="block text-sm/6 font-medium text-gray-900">
-                Purpose
-              </label>
-              <div className="mt-2">
-                <textarea
-                  id="purpose"
-                  name="purpose"
-                  rows={3}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  defaultValue={''}
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="amount" className="block text-sm/6 font-medium text-gray-900">
-                Amount
-              </label>
-              <div className="mt-2">
-                <input
-                  id="amount"
-                  name="amount"
-                  type="number"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="sales-invoice" className="block text-sm/6 font-medium text-gray-900">
-                Sales Invoice
-              </label>
-              <div className="mt-2">
-                <input
-                  id="sales-invoice"
-                  name="sales-invoice"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="date-invoice" className="block text-sm/6 font-medium text-gray-900">
-                Date Invoice
-              </label>
-              <div className="mt-2">
-                <input
-                  id="date-invoice"
-                  name="date-invoice"
-                  type="date"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="date-received-officer" className="block text-sm/6 font-medium text-gray-900">
-                Date Received - Officer
-              </label>
-              <div className="mt-2">
-                <input
-                  id="date-received-officer"
-                  name="date-received-officer"
-                  type="date"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="date-acceptance" className="block text-sm/6 font-medium text-gray-900">
-                Date of Acceptance
-              </label>
-              <div className="mt-2">
-                <input
-                  id="date-acceptance"
-                  name="date-acceptance"
-                  type="date"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="date-inspection" className="block text-sm/6 font-medium text-gray-900">
-                Date of Inspection
-              </label>
-              <div className="mt-2">
-                <input
-                  id="date-inspection"
-                  name="date-inspection"
-                  type="date"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="col-span-full">
-              <label htmlFor="remarks" className="block text-sm/6 font-medium text-gray-900">
-                Remarks
-              </label>
-              <div className="mt-2">
-                <textarea
-                  id="remarks"
-                  name="remarks"
-                  rows={3}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  defaultValue={''}
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="received-by" className="block text-sm/6 font-medium text-gray-900">
-                Received By
-              </label>
-              <div className="mt-2">
-                <input
-                  id="received-by"
-                  name="received-by"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="submitted-by" className="block text-sm/6 font-medium text-gray-900">
-                Submitted By
-              </label>
-              <div className="mt-2">
-                <input
-                  id="submitted-by"
-                  name="submitted-by"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="agency" className="block text-sm/6 font-medium text-gray-900">
-                Agency
-              </label>
-              <div className="mt-2">
-                <input
-                  id="agency"
-                  name="agency"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="date-received-coa" className="block text-sm/6 font-medium text-gray-900">
-                Date Received - COA
-              </label>
-              <div className="mt-2">
-                <input
-                  id="date-received-coa"
-                  name="date-received-coa"
-                  type="date"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label htmlFor="delay-duration" className="block text-sm/6 font-medium text-gray-900">
-                Delay Duration (Days)
-              </label>
-              <div className="mt-2">
-                <input
-                  id="delay-duration"
-                  name="delay-duration"
-                  type="number"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 flex items-center justify-end gap-x-6">
-          <button type="button" className="text-sm/6 font-semibold text-gray-900">
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            Save
-          </button>
-        </div>
-      </div>
-    </form>
-  )
+export default function CustomForm() {
+  return <ProfileForm />;
 }
