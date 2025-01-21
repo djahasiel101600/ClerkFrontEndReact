@@ -10,7 +10,6 @@ import DocumentInventory from "./components/Pages/DocumentInventory";
 import { RCIType, columns } from "./rci/columns";
 import { DataTable } from "./rci/data-table";
 import fetchData from "./services/Api";
-import CustomForm from "./components/forms/Form";
 
 async function getData(): Promise<RCIType[]> {
   // Fetch data from your API here.
@@ -82,7 +81,6 @@ export default function App() {
           />
         </Routes>
       </BrowserRouter>
-      <CustomForm></CustomForm>
     </>
   );
 }
