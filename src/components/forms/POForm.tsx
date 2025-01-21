@@ -1,336 +1,452 @@
-import { useState } from "react";
+"use client";
+
+// import * as React from "react"
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react"
+
+import { cn } from "@/lib/utils"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
+
+// # IAR Fields:
+// # IAR No.
+// # IAR Date
+// # Supplier
+// # Particulars
+// # Amount
+// # Date Received (COA OFfice)
+// # Delay Duration
+// # DateTime Created
+// # DateTime Updated
+// # Remarks
+
+// PO Fields:
+// PO No.
+// PO Date
+// Supplier
+// Particulars
+// Amount
+// Date of Delivery
+// Delivery Term
+// Date Signed by the Supplier
+// Date Received in COA
+// Number of Days Delayed
+// Agency
+// Remarks
+
+const formSchema = z.object({
+  po_no: z.string().min(6, { message: "IAR No. is required" }),
+  po_date: z.date({ required_error: "IAR Date is required" }),
+  supplier: z.string({ message: "Supplier is required" }),
+  particulars: z.string({ message: "Particulars is required" }),
+  purpose: z.string({ message: "Purpose is required" }),
+  amount: z.number().min(0,{ message: "Amount is required" }),
+  date_delivery: z.string({ message: "Date Invoice is required" }),
+  delivery_term: z.string({ message: "Date Received is required" }),
+  date_signed_supplier: z.date({ message: "Date Signed by the supplier is required" }),
+  date_received_coa: z.string().datetime({ message: "Date Received in COA is required" }),
+  agency: z.string({ message: "Agency is required" }),
+  delay_duration: z.number({ message: "Delay Duration is required" }),
+  remarks: z.string().optional(),
+  time: z.date({message: "Date and Time is required"})
+});
 
 export default function POForm() {
-  const [dateReceivedCOA, setDateReceivedCOA] = useState("");
-  const [delayDuration, setDelayDuration] = useState(0);
+  // 1. Define your form.
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = e.target.value;
-    setDateReceivedCOA(date);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      po_no: "",
+      po_date: new Date(),
+      supplier: "",
+      particulars: "",
+      purpose: "",
+      amount: 0,
+      date_delivery: "",
+      delivery_term: "",
+      date_received_coa: "",
+      date_signed_supplier: new Date(),
+      time: new Date(),
+      agency: "",
+      delay_duration: 0,
+      remarks: "none",
+    },
+  });
 
-    if (!date) {
-      setDelayDuration(0);
-      return;
+   
+    function onSubmit(data: z.infer<typeof formSchema>) {
+      toast.success(`Selected date and time: ${format(data.time, "PPPPpppp")}`);
+      console.log(JSON.stringify(data));
+      alert("Clicked  Submit");
     }
-
-    const receivedDate = new Date(date);
-    const currentDate = new Date();
-
-    // Normalize dates to midnight to avoid partial day differences
-    receivedDate.setHours(0, 0, 0, 0);
-    currentDate.setHours(0, 0, 0, 0);
-
-    const diffTime = Math.abs(currentDate.getTime() - receivedDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    setDelayDuration(diffDays);
-  };
+   
+    function handleDateSelect(date: Date | undefined) {
+      if (date) {
+        form.setValue("time", date);
+      }
+    }
+   
+    function handleTimeChange(type: "hour" | "minute" | "ampm", value: string) {
+      const currentDate = form.getValues("time") || new Date();
+      let newDate = new Date(currentDate);
+   
+      if (type === "hour") {
+        const hour = parseInt(value, 10);
+        newDate.setHours(newDate.getHours() >= 12 ? hour + 12 : hour);
+      } else if (type === "minute") {
+        newDate.setMinutes(parseInt(value, 10));
+      } else if (type === "ampm") {
+        const hours = newDate.getHours();
+        if (value === "AM" && hours >= 12) {
+          newDate.setHours(hours - 12);
+        } else if (value === "PM" && hours < 12) {
+          newDate.setHours(hours + 12);
+        }
+      }
+   
+      form.setValue("time", newDate);
+    }
+  // 2. Define a submit handler.
 
   return (
-    <form>
-      <div className="space-y-12">
-        <div className="border-b border-gray-900/10 pb-12">
-          <h2 className="text-base/7 font-semibold text-gray-900">PO Form</h2>
-          <p className="mt-1 text-sm/6 text-gray-600">
-            Please fill out the form below with the required information.
-          </p>
+    <div className="container mx-auto p-4 space-y-4">
+      <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space">
+        <div className="grid grid-cols-5 gap-4">
+          <FormField
+            control={form.control}
+            name="po_no"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>PO Number</FormLabel>
+                <FormControl>
+                  <Input placeholder="0000-00-0000" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Purchase Order No.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="po_date"
+            render={({ field }) => (
+              <FormItem className="flex flex-col pt-2 m-0">
+                <FormLabel>IAR Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-[240px] pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "yyyy-MM-dd")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormDescription>
+                  Inspection and Acceptance Report Date.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        
 
-          <div className="sm:col-span-3">
-            <label
-              htmlFor="po-date"
-              className="block text-sm/6 font-medium text-gray-900"
-            >
-              IAR Number
-            </label>
-            <div className="mt-2">
-              <input
-                id="iar-no"
-                name="iar-no"
-                type="text"
-                className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-              />
-            </div>
-          </div>
-          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="po-no"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                PO No
-              </label>
-              <div className="mt-2">
-                <input
-                  id="po-no"
-                  name="po-no"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
 
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="supplier"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Supplier
-              </label>
-              <div className="mt-2">
-                <input
-                  id="supplier"
-                  name="supplier"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
+    
+        <FormField
+          control={form.control}
+          name="supplier"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Supplier</FormLabel>
+              <FormControl>
+                <Input placeholder="Supplier Name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="po-date"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                PO Date
-              </label>
-              <div className="mt-2">
-                <input
-                  id="po-date"
-                  name="po-date"
-                  type="date"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+        <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="particulars"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Particulars</FormLabel>
+              <FormControl>
+              <Textarea
+                  placeholder="Particulars.."
+                  className="resize-none"
+                  {...field}
                 />
-              </div>
-            </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="purpose"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Purpose</FormLabel>
+              <FormControl>
+              <Textarea
+                  placeholder="Purpose.."
+                  className="resize-none"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        </div>
+  
 
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="delivery-date"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Delivery Date
-              </label>
-              <div className="mt-2">
-                <input
-                  id="delivery-date"
-                  name="delivery-date"
-                  type="date"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="delivery-term"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Delivery Term
-              </label>
-              <div className="mt-2">
-                <input
-                  id="delivery-term"
-                  name="delivery-term"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="col-span-full">
-              <label
-                htmlFor="particulars"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Particulars
-              </label>
-              <div className="mt-2">
-                <textarea
-                  id="particulars"
-                  name="particulars"
-                  rows={3}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  defaultValue={""}
-                />
-              </div>
-            </div>
-
-            <div className="col-span-full">
-              <label
-                htmlFor="purpose"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Purpose
-              </label>
-              <div className="mt-2">
-                <textarea
-                  id="purpose"
-                  name="purpose"
-                  rows={3}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  defaultValue={""}
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="amount"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Amount
-              </label>
-              <div className="mt-2">
-                <input
-                  id="amount"
-                  name="amount"
-                  type="number"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="date-signed-supplier"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Date Signed - Supplier
-              </label>
-              <div className="mt-2">
-                <input
-                  id="date-signed-supplier"
-                  name="date-signed-supplier"
-                  type="date"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="col-span-full">
-              <label
-                htmlFor="remarks"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Remarks
-              </label>
-              <div className="mt-2">
-                <textarea
-                  id="remarks"
-                  name="remarks"
-                  rows={3}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                  defaultValue={""}
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="received-by"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Received By
-              </label>
-              <div className="mt-2">
-                <input
-                  id="received-by"
-                  name="received-by"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="submitted-by"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Submitted By
-              </label>
-              <div className="mt-2">
-                <input
-                  id="submitted-by"
-                  name="submitted-by"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="agency"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Agency
-              </label>
-              <div className="mt-2">
-                <input
-                  id="agency"
-                  name="agency"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="date-received-coa"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Date Received - COA
-              </label>
-              <div className="mt-2">
-                <input
-                  id="date-received-coa"
-                  name="date-received-coa"
-                  type="date"
-                  value={dateReceivedCOA}
-                  onChange={handleDateChange}
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="delay-duration"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Delay Duration (Days)
-              </label>
-              <div className="mt-2">
-                <input
-                  id="delay-duration"
-                  name="delay-duration"
-                  type="number"
-                  value={delayDuration}
-                  readOnly
-                  className="block w-full rounded-md bg-gray-100 px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-          </div>
+        <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="date_delivery"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date of Delivery</FormLabel>
+              <FormControl>
+                <Input placeholder="Date of Delivery" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}/>
         </div>
 
-        <div className="mt-6 flex items-center justify-end gap-x-6">
-          <button
-            type="button"
-            className="text-sm/6 font-semibold text-gray-900"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            Save
-          </button>
+        <FormField
+            control={form.control}
+            name="amount"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Amount</FormLabel>
+                <FormControl>
+                  <Input
+                  type="number"
+                  placeholder="Amount"
+                  {...field}
+                  onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        <FormField
+          control={form.control}
+          name="agency"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Office/Agency</FormLabel>
+              <FormControl>
+                <Input placeholder="Office/Agency.." {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+  
+
+        <div className="grid grid-cols-4 gap-3 mt-3">
+        <FormField
+          control={form.control}
+          name="delivery_term"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Delivery Term</FormLabel>
+              <FormControl>
+                <Input placeholder="Delivery Term" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}/>
         </div>
-      </div>
-    </form>
+        
+ 
+        <FormField
+                  control={form.control}
+                  name="time"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Enter your date & time (12h)</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "MM/dd/yyyy hh:mm aa")
+                              ) : (
+                                <span>MM/DD/YYYY hh:mm aa</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <div className="sm:flex">
+                            <Calendar
+                              mode="single"
+                              selected={field.value}
+                              onSelect={handleDateSelect}
+                              initialFocus
+                            />
+                            <div className="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x">
+                              <ScrollArea className="w-64 sm:w-auto">
+                                <div className="flex sm:flex-col p-2">
+                                  {Array.from({ length: 12 }, (_, i) => i + 1)
+                                    .reverse()
+                                    .map((hour) => (
+                                      <Button
+                                        key={hour}
+                                        size="icon"
+                                        variant={
+                                          field.value &&
+                                          field.value.getHours() % 12 === hour % 12
+                                            ? "default"
+                                            : "ghost"
+                                        }
+                                        className="sm:w-full shrink-0 aspect-square"
+                                        onClick={() =>
+                                          handleTimeChange("hour", hour.toString())
+                                        }
+                                      >
+                                        {hour}
+                                      </Button>
+                                    ))}
+                                </div>
+                                <ScrollBar
+                                  orientation="horizontal"
+                                  className="sm:hidden"
+                                />
+                              </ScrollArea>
+                              <ScrollArea className="w-64 sm:w-auto">
+                                <div className="flex sm:flex-col p-2">
+                                  {Array.from({ length: 12 }, (_, i) => i * 5).map(
+                                    (minute) => (
+                                      <Button
+                                        key={minute}
+                                        size="icon"
+                                        variant={
+                                          field.value &&
+                                          field.value.getMinutes() === minute
+                                            ? "default"
+                                            : "ghost"
+                                        }
+                                        className="sm:w-full shrink-0 aspect-square"
+                                        onClick={() =>
+                                          handleTimeChange("minute", minute.toString())
+                                        }
+                                      >
+                                        {minute.toString().padStart(2, "0")}
+                                      </Button>
+                                    )
+                                  )}
+                                </div>
+                                <ScrollBar
+                                  orientation="horizontal"
+                                  className="sm:hidden"
+                                />
+                              </ScrollArea>
+                              <ScrollArea className="">
+                                <div className="flex sm:flex-col p-2">
+                                  {["AM", "PM"].map((ampm) => (
+                                    <Button
+                                      key={ampm}
+                                      size="icon"
+                                      variant={
+                                        field.value &&
+                                        ((ampm === "AM" &&
+                                          field.value.getHours() < 12) ||
+                                          (ampm === "PM" &&
+                                            field.value.getHours() >= 12))
+                                          ? "default"
+                                          : "ghost"
+                                      }
+                                      className="sm:w-full shrink-0 aspect-square"
+                                      onClick={() => handleTimeChange("ampm", ampm)}
+                                    >
+                                      {ampm}
+                                    </Button>
+                                  ))}
+                                </div>
+                              </ScrollArea>
+                            </div>
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                      <FormDescription>
+                        Please select your preferred date and time.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+        <Button type="submit" className="mt-3">Submit</Button>
+      </form>
+    </Form>
+    </div>
   );
 }

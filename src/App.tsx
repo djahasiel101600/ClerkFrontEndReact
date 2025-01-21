@@ -1,5 +1,4 @@
 import IARForm from "./components/forms/IARForm";
-import POForm from "./components/forms/POForm";
 import PageLayout from "./components/Layouts/PageLayout";
 import Home from "./components/Pages/Home";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -10,6 +9,8 @@ import DocumentInventory from "./components/Pages/DocumentInventory";
 import { RCIType, columns } from "./rci/columns";
 import { DataTable } from "./rci/data-table";
 import fetchData from "./services/Api";
+import RCIForm from "./components/forms/RCIForm";
+import POForm from "./components/forms/POForm";
 
 async function getData(): Promise<RCIType[]> {
   // Fetch data from your API here.

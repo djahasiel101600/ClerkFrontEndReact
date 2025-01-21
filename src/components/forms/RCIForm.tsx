@@ -1,170 +1,203 @@
-import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
-
-export default function RCIForm() {
+"use client";
+ 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CalendarIcon } from "@radix-ui/react-icons";
+import { format } from "date-fns";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+ 
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
+ 
+const FormSchema = z.object({
+  time: z.date({
+    required_error: "A date and time is required.",
+  }),
+});
+ 
+export default function DateTimePickerForm() {
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+  });
+ 
+  function onSubmit(data: z.infer<typeof FormSchema>) {
+    toast.success(`Selected date and time: ${format(data.time, "yyyy-MM-dd HH:mm")}`);
+    console.log(JSON.stringify(data)); 
+  }
+ 
+  function handleDateSelect(date: Date | undefined) {
+    if (date) {
+      form.setValue("time", date);
+    }
+  }
+ 
+  function handleTimeChange(type: "hour" | "minute" | "ampm", value: string) {
+    const currentDate = form.getValues("time") || new Date();
+    let newDate = new Date(currentDate);
+ 
+    if (type === "hour") {
+      const hour = parseInt(value, 10);
+      newDate.setHours(newDate.getHours() >= 12 ? hour + 12 : hour);
+    } else if (type === "minute") {
+      newDate.setMinutes(parseInt(value, 10));
+    } else if (type === "ampm") {
+      const hours = newDate.getHours();
+      if (value === "AM" && hours >= 12) {
+        newDate.setHours(hours - 12);
+      } else if (value === "PM" && hours < 12) {
+        newDate.setHours(hours + 12);
+      }
+    }
+ 
+    form.setValue("time", newDate);
+  }
+ 
   return (
-    <form>
-      <div className="space-y-12">
-        <div className="border-b border-gray-900/10 pb-12">
-          <h2 className="text-base/7 font-semibold text-gray-900">RCI Form</h2>
-          <p className="mt-1 text-sm/6 text-gray-600">
-            Please fill out the form below with the required information.
-          </p>
-
-          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="ada-check-date"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                ADA/Check Date
-              </label>
-              <div className="mt-2">
-                <input
-                  id="ada-check-date"
-                  name="ada-check-date"
-                  type="date"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="ada-check-no"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                ADA/Check No
-              </label>
-              <div className="mt-2">
-                <input
-                  id="ada-check-no"
-                  name="ada-check-no"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="dv-no"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                DV No
-              </label>
-              <div className="mt-2">
-                <input
-                  id="dv-no"
-                  name="dv-no"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="asa-no"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                ASA No
-              </label>
-              <div className="mt-2">
-                <input
-                  id="asa-no"
-                  name="asa-no"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="payee"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Payee
-              </label>
-              <div className="mt-2">
-                <input
-                  id="payee"
-                  name="payee"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="nature-of-transaction"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Nature of Transaction
-              </label>
-              <div className="mt-2">
-                <input
-                  id="nature-of-transaction"
-                  name="nature-of-transaction"
-                  type="text"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="amount-net-of-tax"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Amount (Net of Tax)
-              </label>
-              <div className="mt-2">
-                <input
-                  id="amount-net-of-tax"
-                  name="amount-net-of-tax"
-                  type="number"
-                  step="0.01"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="amount-gross-tax"
-                className="block text-sm/6 font-medium text-gray-900"
-              >
-                Amount (Gross Tax)
-              </label>
-              <div className="mt-2">
-                <input
-                  id="amount-gross-tax"
-                  name="amount-gross-tax"
-                  type="number"
-                  step="0.01"
-                  className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="mt-6 flex items-center justify-end gap-x-6">
-          <button
-            type="button"
-            className="text-sm/6 font-semibold text-gray-900"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            Save
-          </button>
-        </div>
-      </div>
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        <FormField
+          control={form.control}
+          name="time"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Enter your date & time (12h)</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "MM/dd/yyyy hh:mm aa")
+                      ) : (
+                        <span>MM/DD/YYYY hh:mm aa</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <div className="sm:flex">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={handleDateSelect}
+                      initialFocus
+                    />
+                    <div className="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x">
+                      <ScrollArea className="w-64 sm:w-auto">
+                        <div className="flex sm:flex-col p-2">
+                          {Array.from({ length: 12 }, (_, i) => i + 1)
+                            .reverse()
+                            .map((hour) => (
+                              <Button
+                                key={hour}
+                                size="icon"
+                                variant={
+                                  field.value &&
+                                  field.value.getHours() % 12 === hour % 12
+                                    ? "default"
+                                    : "ghost"
+                                }
+                                className="sm:w-full shrink-0 aspect-square"
+                                onClick={() =>
+                                  handleTimeChange("hour", hour.toString())
+                                }
+                              >
+                                {hour}
+                              </Button>
+                            ))}
+                        </div>
+                        <ScrollBar
+                          orientation="horizontal"
+                          className="sm:hidden"
+                        />
+                      </ScrollArea>
+                      <ScrollArea className="w-64 sm:w-auto">
+                        <div className="flex sm:flex-col p-2">
+                          {Array.from({ length: 12 }, (_, i) => i * 5).map(
+                            (minute) => (
+                              <Button
+                                key={minute}
+                                size="icon"
+                                variant={
+                                  field.value &&
+                                  field.value.getMinutes() === minute
+                                    ? "default"
+                                    : "ghost"
+                                }
+                                className="sm:w-full shrink-0 aspect-square"
+                                onClick={() =>
+                                  handleTimeChange("minute", minute.toString())
+                                }
+                              >
+                                {minute.toString().padStart(2, "0")}
+                              </Button>
+                            )
+                          )}
+                        </div>
+                        <ScrollBar
+                          orientation="horizontal"
+                          className="sm:hidden"
+                        />
+                      </ScrollArea>
+                      <ScrollArea className="">
+                        <div className="flex sm:flex-col p-2">
+                          {["AM", "PM"].map((ampm) => (
+                            <Button
+                              key={ampm}
+                              size="icon"
+                              variant={
+                                field.value &&
+                                ((ampm === "AM" &&
+                                  field.value.getHours() < 12) ||
+                                  (ampm === "PM" &&
+                                    field.value.getHours() >= 12))
+                                  ? "default"
+                                  : "ghost"
+                              }
+                              className="sm:w-full shrink-0 aspect-square"
+                              onClick={() => handleTimeChange("ampm", ampm)}
+                            >
+                              {ampm}
+                            </Button>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+              <FormDescription>
+                Please select your preferred date and time.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">Submit</Button>
+      </form>
+    </Form>
   );
 }
