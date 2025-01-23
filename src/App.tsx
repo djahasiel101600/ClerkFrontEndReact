@@ -11,10 +11,11 @@ import { DataTable } from "./rci/data-table";
 import fetchData from "./services/Api";
 import RCIForm from "./components/forms/RCIForm";
 import POForm from "./components/forms/POForm";
-
+import DateTimePickerForm
+ from "./components/forms/RCIForm";
 async function getData(): Promise<RCIType[]> {
   // Fetch data from your API here.
-  const url = "http://127.0.0.1:8000/api/asdi-lfps-disbursment-voucher-record/";
+  const url = "http://127.0.0.1:8000/api/rci/asdi-lfps-disbursment-voucher-record/";
   return await fetchData(url);
 }
 

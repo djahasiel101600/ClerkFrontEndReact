@@ -38,7 +38,6 @@ export default function DateTimePickerForm() {
   });
  
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    toast.success(`Selected date and time: ${format(data.time, "yyyy-MM-dd HH:mm")}`);
     console.log(JSON.stringify(data)); 
   }
  
