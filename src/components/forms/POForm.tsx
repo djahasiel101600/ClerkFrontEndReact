@@ -100,10 +100,21 @@ export default function POForm() {
   });
 
    
-    function onSubmit(data: z.infer<typeof formSchema>) {
-      toast.success(`Selected date and time: ${format(data.time, "PPPPpppp")}`);
-      console.log(JSON.stringify(data));
-      alert("Clicked  Submit");
+    function onSubmit(values: z.infer<typeof formSchema>) {
+      fetch('http://127.0.0.1:8000/api/incoming/iar-record/', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
     }
    
     function handleDateSelect(date: Date | undefined) {
@@ -137,7 +148,7 @@ export default function POForm() {
   return (
     <div className="container mx-auto p-4 space-y-4">
       <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space">
+      <form onSubmit={()=> {form.handleSubmit(onSubmit)}} className="space">
         <div className="grid grid-cols-5 gap-4">
           <FormField
             control={form.control}
